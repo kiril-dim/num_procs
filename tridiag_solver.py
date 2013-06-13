@@ -25,13 +25,13 @@ def SolveTridiagonal(a, b, c, d):
         bc[it] = bc[it] - mc*cc[it-1] 
         dc[it] = dc[it] - mc*dc[it-1]
  
-	xc = ac
+	xc = ac.copy()
 	xc[-1] = dc[-1]/bc[-1]
  
     for il in xrange(nf-2, -1, -1):
         xc[il] = (dc[il]-cc[il]*xc[il+1])/bc[il]
  
-    del bc, cc, dc  # delete variables from memory
+    del ac, bc, cc, dc  # delete variables from memory
  
     return xc
 
@@ -76,11 +76,13 @@ def PSORTridiagonal(a,b,c,d):
 	return V
 
 def RunTest():
-	""" Test if the above implementations for tridiagonal solvers
+	""" 
+		Test if the above implementations for tridiagonal solvers
 		match the ones natively provided by numpy
-		
+			
 		no params
 	"""
+	
 	tolerance = 0.00000000000001
 	toleranceForItr = 0.00001 #Tolerance for iterative procedures
 	mat = np.array([[3.0, 1.0, 0.0],
@@ -89,9 +91,11 @@ def RunTest():
 					
 	Y = np.array([1.0,2.0,3.0])
 
-	supDiag = np.array([1.0,1.2,0.0])
-	subDiag = np.array([0.0,1.11,0.2])
-	Diag = np.ones(3)*3.0
+	supDiag = mat.diagonal(1)
+	supDiag = np.append(supDiag,[0.0])
+	subDiag = mat.diagonal(-1)
+	subDiag = np.append([0.0],subDiag)
+	Diag = mat.diagonal()
 
 	sol1 = np.linalg.solve(mat,Y)
 	sol2 = SolveTridiagonal(subDiag,Diag,supDiag,Y)
@@ -104,7 +108,7 @@ def RunTest():
 	print "PSOR: ", sol3
 	print "Thomson2: ", sol4
 	
-	print "Mostly equal: ", max(abs(sol1-sol2)) < tolerance and max(abs(sol1-sol3)) < toleranceForItr
+	#print "Mostly equal: ", max(abs(sol1-sol2)) < tolerance and max(abs(sol1-sol3)) < toleranceForItr
 	
 def RunSpeedTest():
 	'''
