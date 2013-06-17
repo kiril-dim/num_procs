@@ -16,16 +16,16 @@ import time
 
 # Solving du/dt  = A x d^2/dx^2 + B x d^2/dy^2
 A      = 0.04
-B	   = 0.02
+B      = 0.04
 
 t_step = 0.1
 
 x_step = 0.1
 y_step = 0.1
-x_begin     = -2
-x_end       = 2
-y_begin     = -2
-y_end       = 2
+x_begin     = -1
+x_end       = 1
+y_begin     = -1
+y_end       = 1
 
 x_steps = int((x_end - x_begin)/x_step)
 y_steps = int((y_end - y_begin)/y_step)
@@ -55,8 +55,8 @@ print "Number of y points: ",y_steps
 # U = np.zeros((x_steps,y_steps))
 U = initial_values
 
-r1 = (A*t_step) / (2*x_step**2)
-r2 = (B*t_step) / (2*y_step**2)
+r1 = (A*(t_step/2)) / (2*x_step**2)
+r2 = (B*(t_step/2)) / (2*y_step**2)
 
 # Define our triadiagonal matrix
 # sub diagonal is the same as super diagonal
@@ -83,7 +83,18 @@ def calculateY(arr,r):
     return ret
 
 def DoStep(U):
-
+    ret = np.zeros(np.shape(U))
+    
+    for i in xrange(x_steps):   
+        y = calculateY(U[i].copy(),r1)
+        U[i] = SolveTridiagonal(subDiag_y,Diag_y,supDiag_y,y)
+    
+    for j in xrange(y_steps):   
+        y = calculateY(U[:,j].copy(),r2)
+        ret[:,j] = SolveTridiagonal(subDiag_x,Diag_x,supDiag_x,y)
+        
+    return ret
+    
 
 
 X = np.arange(x_begin, x_end, x_step)
@@ -91,19 +102,19 @@ Y = np.arange(y_begin, y_end, y_step)
 X, Y = np.meshgrid(X, Y)
 
 
-
 m_R = np.sqrt(X**2 + Y**2)
 
-class plot3dClass( object ):
 
-    def __init__( self, systemSideLength, lowerCutoffLength ):
-        self.systemSideLength = systemSideLength
-        self.lowerCutoffLength = lowerCutoffLength
+class plot3dClass( object ):
+    '''
+    Ploting for 3d surfaces with some dummy data for now.
+    '''
+    
+    def __init__( self, U ):
+        self.U = U
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot( 111, projection='3d' )
         self.ax.set_zlim3d( -10e-9, 10e9 )
-
-        U = np.sin(m_R)
 
         self.ax.w_zaxis.set_major_locator( LinearLocator( 10 ) )
         self.ax.w_zaxis.set_major_formatter( FormatStrFormatter( '%.03f' ) )
@@ -112,16 +123,16 @@ class plot3dClass( object ):
         
         # plt.draw() maybe you want to see this frame?
 
-    def drawNow( self, heightR ):
+    def drawNow( self ):
         self.surf.remove()
-        U = heightR*np.sin(m_R)
-        self.surf = self.ax.plot_surface(X, Y, U, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        self.U = DoStep(self.U)
+        self.surf = self.ax.plot_surface(X, Y, self.U, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
         
         plt.draw()                      # redraw the canvas
         time.sleep(1)
 
 matplotlib.interactive(True)
 
-p = plot3dClass(5,1)
-for i in range(150):
-    p.drawNow(i)
+p = plot3dClass(U)
+for i in range(10):
+    p.drawNow()
