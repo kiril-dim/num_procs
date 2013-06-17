@@ -1,1 +1,13 @@
-Contains snippets of mostly numerical procedures, implemented in combination of Python, Numpy, Scipy, Cython and C++.
+Contains snippets of numerical procedures, implemented in combination of Python, Numpy, Scipy, Cython and C/C++(eventually).
+1. 'tridiagonal_solver.py' compares several ways of solving tridiagonal systems.
+2. 'tridiagonal_solver.pyx' Cython implementation of Thomas algorithm for solving tridiagonal systems
+2. 'finite_diff.py' implements Crank-Nicolson scheme to solve basic heat equation.
+3. '2d_heat.py' implements Alternate direction implicit (ADI) method for solving 2D diffusion equation.
+
+Work that needs doing:
+1. Split and organize tridiagonal solvers, adding proper unit testing
+2. 1D finite-differencer needs tidying up. Put in its own class and add customization to inputs.
+	Goal is one day to be able to support UI.
+3. Install script to compile all files written in cython
+
+A set of more clear goals to be defined...
